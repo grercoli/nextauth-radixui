@@ -1,10 +1,13 @@
 "use client"
 
 import { useForm, Controller } from "react-hook-form"
+import { signIn } from "next-auth/react"
 import { Flex, TextField, Button, Text } from '@radix-ui/themes'
 import { EnvelopeClosedIcon, LockClosedIcon } from '@radix-ui/react-icons'
+import { useRouter } from "next/navigation"
 
 const SigninForm = () => {
+  const router = useRouter()
   const { control, handleSubmit, formState: { errors } } = useForm({
     values: {
       email: "",
@@ -12,7 +15,23 @@ const SigninForm = () => {
     }
   })
 
-  const onSubmit = (handleSubmit(data => console.log(data)))
+  const onSubmit = (handleSubmit(async (data) => {
+    // metodo que ya nos permite pasarle las credenciales y hacer la comprobacion de autenticacion
+    // primer parametro el nombre del provider definido en api/auth/[...nextauth]
+    // segundo parametro son los datos
+    const res = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password
+    })
+    
+    if (!res?.ok) {
+      console.log(res)
+    }
+
+    // redirect
+    router.push("/dashboard")
+  }))
 
   return (
     <form onSubmit={onSubmit}>
