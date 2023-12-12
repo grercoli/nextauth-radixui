@@ -4,8 +4,11 @@ import axios from "axios"
 import { useForm, Controller } from "react-hook-form"
 import { Flex, TextField, Button, Text } from '@radix-ui/themes'
 import { EnvelopeClosedIcon, LockClosedIcon, PersonIcon } from '@radix-ui/react-icons'
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 const SignupForm = () => {
+  const router = useRouter()
   const { control, handleSubmit, formState: { errors } } = useForm({
     values: {
       name: "",
@@ -16,6 +19,19 @@ const SignupForm = () => {
 
   const onSubmit = (handleSubmit(async (data) => {
     const respuesta = await axios.post("/api/auth/register", data)
+
+    // el status 201 es el que defini en api/auth/register y 201 significa que se creo un dato
+    if (respuesta.status === 201) {
+      const result = await signIn("credentials", {
+        email: respuesta.data.email,
+        password: data.password,
+        redirect: false
+      })
+
+      if (!result?.ok) console.log(result?.error)
+
+      router.push("/dashboard")
+    }
   }))
 
   return (
@@ -104,7 +120,7 @@ const SignupForm = () => {
 
         {errors.password && <Text color="ruby" className="text-xs">{errors.password.message}</Text>}
 
-        <Button type="submit" mt="4">Sign Up</Button>
+        <Button type="submit" mt="4" variant="solid" color="blue">Sign Up</Button>
       </Flex>
     </form>
   )

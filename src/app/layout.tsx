@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Theme } from '@radix-ui/themes';
 import { Inter } from 'next/font/google'
+import Navbar from '@/components/Navbar';
+import ContextProvider from '@/context/GlobalContext';
 import './globals.css'
 import '@radix-ui/themes/styles.css';
 
@@ -19,9 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Theme appearance='dark'>
-          {children}
-        </Theme>
+        <ContextProvider>
+          <Theme appearance='dark'>
+            <Navbar />
+            {children}
+          </Theme>
+        </ContextProvider>
       </body>
     </html>
   )
