@@ -7,10 +7,12 @@ import { useSession, signOut } from "next-auth/react"
 
 const Navbar = () => {
   // useSession es un hook que se ejecuta en cualquier componente cliente que nos va a dar informacion de la sesion del usuario
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+
+  if (status === "loading") return null
 
   return (
-    <nav className="bg-zinc-950 py-4">
+    <nav className="px-10 md:px-0 bg-zinc-950 py-4">
       <Container>
         <Flex justify="between" align="center">
           <NextLink href="/">
