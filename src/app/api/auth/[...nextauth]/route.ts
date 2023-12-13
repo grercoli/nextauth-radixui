@@ -1,9 +1,9 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcrypt"
 import prisma from "@/libs/prisma"
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -37,9 +37,34 @@ const handler = NextAuth({
       }
     })
   ],
+  // son como eventos que se ejecutan
+  callbacks: {
+    // se ejecuta cuando se crea el token en el front, es decir cuando se crea o inicia la sesion. Se ejecuta cuando se define el jwt en la cookie
+    // este evento lo guarda en el token
+    async jwt({ token, user, account, profile }) {
+      if (user) {
+        // al objeto token le añado una propiedad llamada id y le agrego el valor de user.id
+        token.id = user.id;
+      }
+
+      return token;
+    },
+    // se ejecuta cuando se crea la sesion pero es lo que se puede ver en consola
+    // este evento lo guarda en la sesion
+    async session({ session, user, token }) {
+      if (token) {
+        // al objeto session le añado una propiedad llamada id y le agrego el valor de token.sub que vendria a ser el id
+        session.user.id = token.sub as string;
+      }
+
+      return session;
+    }
+  },
   pages: {
     signIn: "/auth/login"
   }
-})
+}
+
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
